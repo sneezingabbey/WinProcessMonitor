@@ -49,7 +49,7 @@ public class ProcessHelperTests
     {
         // ACT
         var processName = _processHelper.GetProcessName().ToLower();
-        var foundProcess = _processHelper.FindProcess(processName);
+        var foundProcess = FindProcess(processName);
 
         // ASSERT
         if (foundProcess == null)
@@ -61,13 +61,6 @@ public class ProcessHelperTests
         var foundProcName = foundProcess.ProcessName.ToLower();
 
         Assert.That(processName, Is.EqualTo(foundProcName));
-    }
-
-    [Test]
-    public void CheckProcess_Throws_NullException()
-    {
-        // ASSERT
-        Assert.Throws<ArgumentNullException>(() => _processHelperNull.CheckProcess());
     }
 
     [Test]
@@ -86,5 +79,10 @@ public class ProcessHelperTests
         process.StartInfo.FileName = $"{name}.exe";
         process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
         process.Start();
+    }
+
+    private static Process? FindProcess(string name)
+    {
+        return Process.GetProcessesByName(name).FirstOrDefault();
     }
 }

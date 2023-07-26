@@ -8,8 +8,6 @@ public class ProcessHelper
     private readonly int _maximumLifetime;
     private readonly string _processName;
 
-    private Process? _process;
-
     public ProcessHelper(string processName, int maximumLifetime, int frequency)
     {
         _processName = processName;
@@ -19,31 +17,27 @@ public class ProcessHelper
 
     public void CheckProcess()
     {
-        _process = FindProcess(_processName);
-
-        if (_process is null) throw new ArgumentNullException(nameof(_process));
-
-        var runtime = DateTime.Now - _process.StartTime;
+        foreach (var process in Process.GetProcessesByName(_processName))
+        {
+            var runtime = DateTime.Now - process.StartTime;
 
 #if DEBUG
-        Console.WriteLine(
-            $"Runtime (minutes): {runtime.Minutes}, StartTime: {_process.StartTime}, CurrentTime: {DateTime.Now}");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine(
+                $"Runtime (minutes): {runtime.Minutes}, StartTime: {process.StartTime}, CurrentTime: {DateTime.Now}");
 #endif
 
-        if (_maximumLifetime <= 0) throw new ArgumentOutOfRangeException(nameof(_maximumLifetime));
+            if (_maximumLifetime <= 0) throw new ArgumentOutOfRangeException(nameof(_maximumLifetime));
 
-        if (runtime.Minutes <= _maximumLifetime) return;
-
-        Console.WriteLine(
-            $"A process called {_process.ProcessName} has been running for {runtime.Minutes} minutes, which exceeds maximum lifetime of {_maximumLifetime} minutes");
-        _process.Kill();
-    }
-
-    public Process? FindProcess(string processName)
-    {
-        foreach (var process in Process.GetProcessesByName(processName)) _process = process;
-
-        return _process;
+            if (runtime.Minutes > _maximumLifetime)
+            {
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine(
+                    $"A process called {process.ProcessName} has been running for {runtime.Minutes} minutes, which exceeds maximum lifetime of {_maximumLifetime} minutes");
+                process.Kill();
+                process.Dispose();
+            }
+        }
     }
 
     public string GetProcessName()

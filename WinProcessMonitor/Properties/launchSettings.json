@@ -2,7 +2,7 @@
   "profiles": {
     "WinProcessMonitor": {
       "commandName": "Project",
-      "commandLineArgs": "notepad 5 1 "
+      "commandLineArgs": "notepad 1 1 "
     }
   }
 }
